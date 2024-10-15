@@ -1,16 +1,16 @@
 class BooksController < ApplicationController
+  before_action :ensure_correct_user, only: [:edit, :update, :destroy]
 
   def show
-    @book = Book.new
-    @user = @book.user
-    @existing_book = Book.find(params[:id])
+  @existing_book = Book.find(params[:id])
+  @user = @existing_book.user # ここで関連するユーザーを取得
+  @book = Book.new
     
   end
 
   def index
     @books = Book.all
     @book = Book.new
-    @user = @book.user
   end
 
   def create
@@ -47,5 +47,12 @@ class BooksController < ApplicationController
 
   def book_params
     params.require(:book).permit(:title, :body)
+  end
+  
+  def ensure_correct_user
+    @book = Book.find(params[:id])
+    unless @book.user == current_user
+      redirect_to books_path
+    end
   end
 end
